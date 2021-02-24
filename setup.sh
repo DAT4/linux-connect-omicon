@@ -1,6 +1,6 @@
 PORT=1111
-NAME=dtu
-HOST=localhost
+NAME="dtu"
+HOST="thinlinc.gbar.dtu.dk"
 whiptail --title "SHH Configuration for Omicon through Thinlinc" --msgbox "This script will help you to set up with Omicon and thinlinc over ssh" 8 78
 
 ID=$(whiptail --inputbox "What is your student number?" 8 39 Blue --title "Example Dialog" 3>&1 1>&2 2>&3)
@@ -10,8 +10,7 @@ if [ $exitstatus != 0 ]; then
     exit
 fi
 
-#REGEX_ID='^s\d{6}$'
-REGEX_ID='martin'
+REGEX_ID='^s\d{6}$'
 echo "$ID" | grep -P -q $REGEX_ID
 exitstatus=$?
 if [ $exitstatus != 0 ]; then
@@ -46,9 +45,8 @@ Host $NAME
 " >> ~/.ssh/config
 
 ssh $NAME "ssh-keygen -f ~/.ssh/nana -t rsa -N '' -b 2048; exit"
-ssh $NAME "
-echo \"INSTALLING THE OMICON\"
-echo \"
+
+CFG="
 Host omicon
     HostName 130.226.195.126
     User passthru
@@ -56,9 +54,9 @@ Host omicon
     IdentityFile ~/.ssh/$NAME
     LocalForward $PORT 192.168.149.44:9869
     ControlMaster yes
-    ControlPath ~/.ssh/sockets/%r@%h:%p
-\" >> ~/.ssh/config
-"
+    ControlPath ~/.ssh/sockets/%r@%h:%p" 
+
+ssh $NAME "echo $CFG >> ~/.ssh/config"
 scp $NAME:.ssh/$NAME.pub .
 KEY=$( cat $NAME.pub )
 
@@ -68,6 +66,18 @@ echo "
 ######################################################
 
 $KEY
+
+######################################################
+
+THEN YOU CAN CONNECT WITH:
+
+ssh dtu -fN 'ssh omicon -fN'
+
+------------------------------------------------------
+
+AND OPEN YOUR BROWSER ON:
+
+http://localhost:1111
 
 ######################################################"
 
